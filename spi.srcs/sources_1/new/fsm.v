@@ -12,8 +12,8 @@ output sclk,cs,hazir
   localparam s_bosta = 0, s_hazirlik= 1, s_aktarim = 2, s_bitis = 3;
 reg [1:0] state, next_state;
 reg sclk_reg;
-reg [7:0] shift_reg; // Veriyi burada tutacağız
-reg [2:0]bit_sayac; // Kaçıncı bittiğini burada sayacağız
+reg [7:0] shift_reg; 
+reg [2:0]bit_sayac; 
    reg  [5:0]sayac;
    assign cs = (state == s_bosta) ? 1 : 0;
    assign hazir = (state == s_bitis);
@@ -36,7 +36,7 @@ always @(*) begin
 end
 
 
-// Veri ve Sayaç Güncelleme (SCLK ile senkronize)
+
 always @(posedge clk or posedge reset) begin
 if(reset)begin
 shift_reg <= 0;
@@ -47,20 +47,19 @@ shift_reg <= 0;
         s_hazirlik: begin
             shift_reg <= veri_gonder;
             bit_sayac <= 0;
-            mosi <= veri_gonder[7]; // İlk biti hemen hatta koyalım
+            mosi <= veri_gonder[7]; 
         end
         
         s_aktarim: begin
-            // SCLK tam düşerken (1 -> 0 geçişi) veriyi kaydır
-            // sayac == 49 ve sclk_reg == 1 olduğu an, bir sonraki clk'da sclk 0 olacak demektir.
+           
             if (sayac == 49 && sclk_reg == 1) begin
                 if (bit_sayac < 7) begin
                     shift_reg <= {shift_reg[6:0], 1'b0};
-                    mosi <= shift_reg[7]; // Bir sonraki biti mosi'ye ver
+                    mosi <= shift_reg[7]; 
                     bit_sayac <= bit_sayac + 1;
                 end
                 else begin
-                    bit_sayac <= 7; // 8 bit doldu, state makinesi bitişe götürecek
+                    bit_sayac <= 7; 
                 end
             end
         end
@@ -75,14 +74,14 @@ end
 
 
 
-// SCLK Üretimi ve Sayaç Mantığı
+
 always @(posedge clk or posedge reset) begin
     if (reset) begin
         sayac <= 0;
         sclk_reg <= 0;
     end 
     else if (state == s_aktarim) begin
-        if (sayac == 49) begin // 50'de bir tersle
+        if (sayac == 49) begin 
             sayac <= 0;
             sclk_reg <= ~sclk_reg;
         end 
@@ -92,7 +91,7 @@ always @(posedge clk or posedge reset) begin
     end 
     else begin
         sayac <= 0;
-        sclk_reg <= 0; // Aktarım bittiğinde saati sıfıra çek (Mode 0)
+        sclk_reg <= 0; 
     end
 end
 
